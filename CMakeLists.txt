@@ -16,12 +16,11 @@ add_definitions(${LLVM_DEFINITIONS})
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(llvm_pass_for_instrumentation
-        llvm-pass.cpp)
+add_executable(llvm_pass_for_instrumentation llvm-pass.cpp)
 
 # Find the libraries that correspond to the LLVM components
 # that we wish to use
-llvm_map_components_to_libnames(llvm_libs support core irreader bitwriter transformutils)
+llvm_map_components_to_libnames(llvm_libs irreader ipo)
 
 # Link against LLVM libraries
 target_link_libraries(llvm_pass_for_instrumentation ${llvm_libs})
