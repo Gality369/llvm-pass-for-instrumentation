@@ -17,14 +17,18 @@ add_definitions(${LLVM_DEFINITIONS})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/out)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build/out)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/out)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 
 #AUX_SOURCE_DIRECTORY(. SRC_LIST)
-add_executable(llvm_pass_for_instrumentation myclangwrapper.c)
+#add_executable(llvm_pass_for_instrumentation myclangwrapper.c
+#        llvm-rt.o.c)
 
 #动态库
-#add_library(llvm_pass_for_instrumentation MODULE llvm-pass.so.cpp)
 #set_target_properties(llvm_pass_for_instrumentation PROPERTIES output_name "llvm_pass")
+add_library(llvm_pass_for_instrumentation OBJECT llvm-pass.so.cpp)
+#add_library(llvm_pass_for_instrumentation OBJECT llvm-rt.o.c)
+
 
 
 
@@ -34,3 +38,4 @@ llvm_map_components_to_libnames(llvm_libs irreader ipo)
 
 # Link against LLVM libraries
 target_link_libraries(llvm_pass_for_instrumentation ${llvm_libs})
+

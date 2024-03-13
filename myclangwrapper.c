@@ -9,9 +9,9 @@
 #include "tools.h"
 #include "alloc-inl.h"
 
-static uint8_t *  obj_path;  /* Path to runtime libraries         */
-static uint8_t ** cc_params;              /* Parameters passed to the real CC  */
-static uint32_t cc_par_cnt = 1;         /* Param count, including argv0      */
+static uint8_t *  obj_path;                /* Path to runtime libraries         */
+static uint8_t ** cc_params;               /* Parameters passed to the real CC  */
+static uint32_t cc_par_cnt = 1;            /* Param count, including argv0      */
 
 static void find_obj(u8* argv0) {
   u8 *slash, *tmp;
@@ -26,7 +26,7 @@ static void find_obj(u8* argv0) {
     dir = ck_strdup(argv0);
     *slash = '/';
 
-    tmp = alloc_printf("%s/afl-llvm-rt.o", dir);
+    tmp = alloc_printf("%s/llvm-rt.o", dir);
 
     if (!access(tmp, R_OK)) {
       obj_path = dir;
@@ -39,7 +39,7 @@ static void find_obj(u8* argv0) {
 
   }
 
-  FATAL("Unable to find 'afl-llvm-rt.o', please check");
+  FATAL("Unable to find 'llvm-rt.o', please check");
 
 }
 
@@ -62,7 +62,7 @@ static void edit_params(u32 argc, char** argv) {
   cc_params[cc_par_cnt++] = "-Xclang";
   cc_params[cc_par_cnt++] = "-load";
   cc_params[cc_par_cnt++] = "-Xclang";
-  cc_params[cc_par_cnt++] = alloc_printf("%s/libllvm_pass_for_instrumentation.dylib", obj_path);
+  cc_params[cc_par_cnt++] = alloc_printf("%s/llvm-pass.so", obj_path);
   cc_params[cc_par_cnt++] = "-Qunused-arguments";
 
   while (--argc) {
@@ -97,11 +97,11 @@ static void edit_params(u32 argc, char** argv) {
   switch (bit_mode) {
 
     case 0:
-      cc_params[cc_par_cnt++] = alloc_printf("%s/afl-llvm-rt.o", obj_path);
+      cc_params[cc_par_cnt++] = alloc_printf("%s/llvm-rt.o", obj_path);
       break;
 
     case 32:
-      cc_params[cc_par_cnt++] = alloc_printf("%s/afl-llvm-rt-32.o", obj_path);
+      cc_params[cc_par_cnt++] = alloc_printf("%s/llvm-rt-32.o", obj_path);
 
       if (access(cc_params[cc_par_cnt - 1], R_OK))
         FATAL("-m32 is not supported by your compiler");
@@ -109,7 +109,7 @@ static void edit_params(u32 argc, char** argv) {
       break;
 
     case 64:
-      cc_params[cc_par_cnt++] = alloc_printf("%s/afl-llvm-rt-64.o", obj_path);
+      cc_params[cc_par_cnt++] = alloc_printf("%s/llvm-rt-64.o", obj_path);
 
       if (access(cc_params[cc_par_cnt - 1], R_OK))
         FATAL("-m64 is not supported by your compiler");
