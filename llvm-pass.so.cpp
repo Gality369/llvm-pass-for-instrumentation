@@ -3,8 +3,8 @@
 //
 #include "tools.h"
 
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/IRBuilder.h"
@@ -30,18 +30,9 @@ bool Coverage::runOnModule(Module &M) {
     IntegerType *Int32Ty = IntegerType::getInt32Ty(ctx);
 
     /* Decide instrumentation ratio */
-    char* inst_ratio_str = getenv("INST_RATIO");
     unsigned int inst_ratio = 100;
 
-    if (inst_ratio_str) {
-
-        if (sscanf(inst_ratio_str, "%u", &inst_ratio) != 1 || !inst_ratio ||
-            inst_ratio > 100)
-            FATAL("Bad value of AFL_INST_RATIO (must be between 1 and 100)");
-
-    }
-
-    //指向 "用于输出控制流覆盖次数的共享内存" 的指针(其实就是一个hashtable, 继续看下面就知道了)
+    // 指向 "用于输出控制流覆盖次数的共享内存" 的指针(其实就是一个hashtable, 继续看下面就知道了)
     auto *mapPtr =
             new GlobalVariable(M, PointerType::get(Int8Ty, 0), false,
                                GlobalVariable::ExternalLinkage, 0, "__area_ptr");
@@ -66,7 +57,7 @@ bool Coverage::runOnModule(Module &M) {
         ConstantInt *CurLoc = ConstantInt::get(Int32Ty, cur_loc);
 
         /* Load prev_loc */
-        //加载上一个基础块的编号
+        // 加载上一个基础块的编号
         LoadInst *PrevLoc = IRB.CreateLoad(prevLoc);
         // 增加调试信息(元数据)
         PrevLoc->setMetadata(M.getMDKindID("nosanitize"), MDNode::get(ctx, None));
@@ -112,8 +103,9 @@ static void registerPass(const PassManagerBuilder &, legacy::PassManagerBase &PM
   PM.add(new Coverage());
 }
 
-static RegisterStandardPasses RegisterAFLPass(
+// 注册为模块级优化器的回调
+static RegisterStandardPasses RegisterMyPass(
         PassManagerBuilder::EP_ModuleOptimizerEarly, registerPass);
-
-static RegisterStandardPasses RegisterAFLPass0(
+// 注册为优化级别为 0 时的回调函数
+static RegisterStandardPasses RegisterMyPass0(
         PassManagerBuilder::EP_EnabledOnOptLevel0, registerPass);
